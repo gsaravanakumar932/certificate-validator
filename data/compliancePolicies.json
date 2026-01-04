@@ -1,0 +1,10 @@
+[
+  {
+    "id": "policy-1",
+    "name": "Enterprise Default",
+    "minKeySize": 2048,
+    "allowedKeyTypes": ["RSA", "ECDSA"],
+    "allowedSignatureAlgorithms": ["SHA-256", "SHA-384"],
+    "minTlsVersion": "TLSv1.2"
+  }
+]
