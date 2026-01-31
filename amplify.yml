@@ -1,0 +1,33 @@
+version: 1
+backend:
+  phases:
+    build:
+      commands:
+        - '# No backend build needed for this API-only app'
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - echo "Installing dependencies..."
+        - npm ci --cache .npm --prefer-offline
+        - echo "Dependencies installed successfully"
+    build:
+      commands:
+        - echo "Building TypeScript application..."
+        - npx tsc
+        - echo "TypeScript compilation completed"
+        - echo "Copying static assets to dist folder..."
+        - mkdir -p dist/public dist/data
+        - cp -r public/* dist/public/ 2>/dev/null || echo "No public files to copy"
+        - cp -r data/* dist/data/ 2>/dev/null || echo "No data files to copy"
+        - echo "Verifying build output..."
+        - ls -la dist/
+        - echo "Build completed successfully!"
+  artifacts:
+    baseDirectory: dist
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
+      - .npm/**/*
