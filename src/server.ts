@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 // import helmet from 'helmet'; // Temporarily disabled per request to relax security checks
 import { router as apiRouter } from './routes';
 import { authMiddleware } from './middleware/auth';
@@ -12,8 +13,14 @@ app.use(cors({ origin: '*'}));
 // Disabled auth: this middleware is a no-op and allows all requests
 app.use(authMiddleware);
 app.use(express.json());
-// Serve static dashboard from /public
-app.use(express.static('public'));
+
+// Serve static dashboard from /public (works from dist by resolving relative to __dirname)
+app.use(express.static(path.join(__dirname, '../public')));
+
+// Root route to avoid 404s: provides quick guidance and status
+app.get('/', (_req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
 
 // Root route to avoid 404s: provides quick guidance and status
 app.get('/', (_req, res) => {

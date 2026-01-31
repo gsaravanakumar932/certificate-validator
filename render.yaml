@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: certintel-api
+    env: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/server.js
+    envVars:
+      - key: NPM_CONFIG_PRODUCTION
+        value: "false"  # ensure devDependencies (typescript) are installed during build
+      - key: NODE_ENV
+        value: production

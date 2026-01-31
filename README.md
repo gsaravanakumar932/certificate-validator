@@ -3,10 +3,10 @@
 Lightweight, agentless, AI-integrated certificate intelligence platform backend.
 
 ## Features
-- Agentless discovery stubs: domains/IP ranges → mock certificates
+- Agentless discovery stubs: domains/IP ranges → mock certificates.
 - AI risk scoring + expiry prediction
 - Compliance policy enforcement
-- Centralized REST API (Express)
+- Centralized REST API (Express).
 - Reporting summary and AWS SDK stubs (S3 upload commented)
 - DB connection stubs (PostgreSQL + Elasticsearch commented)
 

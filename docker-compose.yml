@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  # Main CertIntel API application
+  certintel-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: certintel-api
+    ports:
+      - "8800:8800"
+    environment:
+      - NODE_ENV=production
+      - PORT=8800
+      # Database configuration (uncomment when enabling DB persistence)
+      # - DB_HOST=postgres
+      # - DB_PORT=5432
+      # - DB_NAME=certintel
+      # - DB_USER=certintel
+      # - DB_PASSWORD=changeme
+      # - ELASTICSEARCH_URL=http://elasticsearch:9200
+    volumes:
+      # Mount data directory for JSON file persistence
+      - ./data:/app/data:ro
+    networks:
+      - certintel-network
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - elasticsearch
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8800/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # PostgreSQL database (optional - currently using in-memory storage)
+  postgres:
+    image: postgres:15-alpine
+    container_name: certintel-postgres
+    environment:
+      POSTGRES_DB: certintel
+      POSTGRES_USER: certintel
+      POSTGRES_PASSWORD: changeme
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - certintel-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U certintel"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Elasticsearch (optional - for search functionality)
+  elasticsearch:
+    image: elasticsearch:8.11.0
+    container_name: certintel-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=false
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - certintel-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+networks:
+  certintel-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  elasticsearch_data:
+    driver: local
